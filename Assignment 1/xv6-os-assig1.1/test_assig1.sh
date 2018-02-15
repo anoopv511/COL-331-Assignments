@@ -42,11 +42,11 @@ if {$force_conservative} {
 # -Don
 
 
-set timeout -1
+set timeout -2
 set testname [lindex $argv 0];
 
 spawn /bin/sh
-expect "$ "
+expect ">> "
 send "make qemu-nox\r"
 sleep 1
 expect "$"
@@ -55,6 +55,6 @@ sleep 1
 expect "$"
 send "\x01"; send "x"
 expect "QEMU: Terminated\r"
-expect "$ "
+expect ">> "
 send "exit\r"
 expect eof

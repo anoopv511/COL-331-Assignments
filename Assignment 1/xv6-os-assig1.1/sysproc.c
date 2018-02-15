@@ -89,3 +89,29 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// toggles the system trace (1 - ON | 0 - OFF)
+int toggle_state = 1;
+int
+sys_toggle(void)
+{
+  toggle_state = toggle_state == 0 ? 1 : 0;
+  return toggle_state;
+}
+
+// add two numbers
+int
+sys_add(void)
+{
+  int a;
+  int b;
+
+  if(argint(0, &a) < 0)
+    return -1;
+  if(argint(1, &b) < 0)
+    return -1;
+  return a + b;
+}
+
+// list all processes
+extern int sys_ps(void);

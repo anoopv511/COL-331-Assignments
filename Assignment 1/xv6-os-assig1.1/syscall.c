@@ -103,6 +103,11 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+extern int sys_toggle(void);
+extern int sys_add(void);
+extern int sys_ps(void);
+
+extern int toggle_state;
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -126,7 +131,95 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_toggle]  sys_toggle,
+[SYS_add]     sys_add,
+[SYS_ps]      sys_ps
 };
+
+int syscall_count[24] = {0};
+// Syscall identification
+void
+print_syscalls(struct proc *p)
+{
+  switch(p->tf->eax)
+  {
+    case 1:
+      cprintf("%s %d\n","sys_fork",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 2:
+      cprintf("%s %d\n","sys_exit",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 3:
+      cprintf("%s %d\n","sys_wait",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 4:
+      cprintf("%s %d\n","sys_pipe",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 5:
+      cprintf("%s %d\n","sys_read",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 6:
+      cprintf("%s %d\n","sys_kill",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 7:
+      cprintf("%s %d\n","sys_exec",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 8:
+      cprintf("%s %d\n","sys_fstat",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 9:
+      cprintf("%s %d\n","sys_chdir",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 10:
+      cprintf("%s %d\n","sys_dup",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 11:
+      cprintf("%s %d\n","sys_getpid",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 12:
+      cprintf("%s %d\n","sys_sbrk",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 13:
+      cprintf("%s %d\n","sys_sleep",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 14:
+      cprintf("%s %d\n","sys_uptime",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 15:
+      cprintf("%s %d\n","sys_open",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 16:
+      cprintf("%s %d\n","sys_write",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 17:
+      cprintf("%s %d\n","sys_mknod",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 18:
+      cprintf("%s %d\n","sys_unlink",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 19:
+      cprintf("%s %d\n","sys_link",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 20:
+      cprintf("%s %d\n","sys_mkdir",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 21:
+      cprintf("%s %d\n","sys_close",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 22:
+      cprintf("%s %d\n","sys_toggle",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 23:
+      cprintf("%s %d\n","sys_add",++syscall_count[p->tf->eax - 1]);
+      break;
+    case 24:
+      cprintf("%s %d\n","sys_ps",++syscall_count[p->tf->eax - 1]);
+      break;
+    default:
+      cprintf("Unknown syscall\n");
+      break;
+  }
+}
 
 void
 syscall(void)
@@ -136,6 +229,9 @@ syscall(void)
 
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+    if(toggle_state == 1){
+      print_syscalls(curproc);
+    }
     curproc->tf->eax = syscalls[num]();
   } else {
     cprintf("%d %s: unknown sys call %d\n",

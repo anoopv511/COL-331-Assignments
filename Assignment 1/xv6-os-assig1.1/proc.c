@@ -267,6 +267,24 @@ exit(void)
   panic("zombie exit");
 }
 
+// list all processes
+int
+sys_ps(void)
+{
+  struct proc *p;
+  
+  acquire(&ptable.lock);
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid != 0){
+      cprintf("pid:%d name:%s\n",p->pid,p->name);
+    }
+  }
+
+  release(&ptable.lock);
+  return 0;
+}
+
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
 int
