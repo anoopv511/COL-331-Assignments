@@ -272,11 +272,39 @@ int
 sys_ps(void)
 {
   struct proc *p;
+
+  // const char* state;
   
   acquire(&ptable.lock);
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->pid != 0){
+    // if(p->pid != 0){
+    //   switch(p->state){
+    //   	case UNUSED:
+    //   	  state = "UNUSED";
+    //   	  break;
+    //   	case EMBRYO:
+    //   	  state = "EMBRYO";
+    //   	  break;
+    //   	case SLEEPING:
+    //   	  state = "SLEEPING";
+    //   	  break;
+    //   	case RUNNABLE:
+    //   	  state = "RUNNABLE";
+    //   	  break;
+    //   	case RUNNING:
+    //   	  state = "RUNNING";
+    //   	  break;
+    //   	case ZOMBIE:
+    //   	  state = "ZOMBIE";
+    //   	  break;
+    //   	default:
+    //   	  state = "UNKNOWN";
+    //   	  break;
+    //   }
+    //   cprintf("pid:%d name:%s state:%s parent_pid:%d\n",p->pid,p->name,state,p->parent->pid);
+    // }
+    if(p->pid != 0 && p->state != ZOMBIE){
       cprintf("pid:%d name:%s\n",p->pid,p->name);
     }
   }
