@@ -1,0 +1,172 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.8in,bottom=0.5in,top=0.7in]{geometry}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{scrextend}
+\usepackage{expl3,xparse}
+
+\definecolor{gray}{rgb}{0.8,0.8,0.8}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{cream}{rgb}{1.0, 0.99, 0.6}
+
+\lstset{language=C,
+    basicstyle=\ttfamily,
+    keywordstyle=\color{blue}\ttfamily,
+    stringstyle=\color{mauve}\ttfamily,
+    commentstyle=\color{green}\ttfamily,
+    morecomment=[l][\color{magenta}]{\#}
+    showstringspaces=false,
+    morekeywords={include, printf},
+    backgroundcolor=\color{white},
+    showstringspaces=false,
+    numbers=left,
+    stepnumber=1,
+    breaklines=true,
+}
+
+\title{\underline{\textbf{Assignment 1 Report}}}
+\author{\textbf{Anoop (2015CS10265)}}
+
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+
+\section*{\underline{Part 1 - System Call Tracing}}
+\subsection*{Printing the Trace}
+\begin{addmargin}[0.7in]{0in}
+\begin{lstlisting}[language=C,firstnumber=231,caption=Modification in ``{\ttfamily{syscall}}" function - {\ttfamily{syscall.c}},frame=single]
+if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+\end{lstlisting}
+
+\vspace{-\baselineskip}
+\begin{lstlisting}[language=C,firstnumber=232,frame=single,backgroundcolor=\color{cream}]
+    if(toggle_state == 1){
+        print_syscalls(curproc);
+    }
+\end{lstlisting}
+
+\vspace{-\baselineskip}
+\begin{lstlisting}[language=C,firstnumber=235,frame=single]
+    curproc->tf->eax = syscalls[num]();
+} else {
+    cprintf("%d %s: unknown sys call %d\n",
+    curproc->pid, curproc->name, num);
+    curproc->tf->eax = -1;
+}
+\end{lstlisting}
+\end{addmargin}
+
+\vspace{5mm}
+\begin{addmargin}[0.1in]{0in}
+    At line $233$ in Listing 1, the function {\ttfamily{print\_syscalls}} is used to print the syscalls that are issued.
+\end{addmargin}
+\vspace{5mm}
+
+\begin{addmargin}[0.7in]{0in}
+\begin{lstlisting}[language=C,firstnumber=139,caption={\ttfamily{print\_syscalls}} function implementation - {\ttfamily{syscall.c}},frame=single,backgroundcolor=\color{cream}]
+int syscall_count[24] = {0};
+\end{lstlisting}
+
+\vspace{-\baselineskip}
+\begin{lstlisting}[language=C,firstnumber=140,frame=single,backgroundcolor=\color{cream}]
+// Syscall identification
+void
+print_syscalls(struct proc *p)
+{
+    switch(p->tf->eax)
+    {
+    case 1:
+        cprintf("%s %d\n","sys_fork",++syscall_count[p->tf->eax - 1]);
+        break;
+    case 2:
+        .
+        .
+\end{lstlisting}
+
+\begin{lstlisting}[language=C,firstnumber=218,frame=single,backgroundcolor=\color{cream}]
+    default:
+        cprintf("Unknown syscall\n");
+        break;
+    }
+}
+\end{lstlisting}
+\end{addmargin}
+
+\vspace{5mm}
+\begin{addmargin}[0.1in]{0in}
+    {\ttfamily{print\_syscalls}} function implementation uses a global array ({\ttfamily{syscall\_count}}) to maintain the count of the syscalls issued. The function uses {\ttfamily{switch-case}} statements to print appropriate syscall count when called.
+\end{addmargin}
+
+\subsection*{Toggling the Printing of Trace}
+\begin{addmargin}[0.7in]{0in}
+\begin{lstlisting}[language=C,firstnumber=93,caption={\ttfamily{sys\_toggle}} function implementation - {\ttfamily{sysproc.c}},frame=single,backgroundcolor=\color{cream}]
+// toggles the system trace (1 - ON | 0 - OFF)
+int toggle_state = 1;
+int
+sys_toggle(void)
+{
+    toggle_state = toggle_state == 0 ? 1 : 0;
+    return toggle_state;
+}
+\end{lstlisting}
+\end{addmargin}
+
+\vspace{5mm}
+\begin{addmargin}[0.1in]{0in}
+    For the {\ttfamily{sys\_toggle}} system call implementation, a global variable ({\ttfamily{toggle\_state}}) has been used to indicate the state of the system trace. Corresponding additions of definitions have been done in files - {\ttfamily{user.h, syscall.h, usys.S}}. An {\ttfamily{if}} statement has been added to {\ttfamily{syscall.c}} to check the {\ttfamily{toggle\_state}} before printing the trace (see code - Listing 1). {\ttfamily{user\_toggle.c}} file has been added to test the toggle system call implementation.
+\end{addmargin}
+
+\section*{\underline{Part 2 - {\ttfamily{sys\_add}} System Call}}
+\begin{addmargin}[0.7in]{0in}
+\begin{lstlisting}[language=C,firstnumber=102,caption={\ttfamily{sys\_add}} function implementation - {\ttfamily{sysproc.c}},frame=single,backgroundcolor=\color{cream}]
+// add two numbers
+int
+sys_add(void)
+{
+    int a;
+    int b;
+
+    if(argint(0, &a) < 0)
+    return -1;
+    if(argint(1, &b) < 0)
+    return -1;
+    return a + b;
+}
+\end{lstlisting}
+\end{addmargin}
+
+\begin{addmargin}[0.1in]{0in}
+    For the {\ttfamily{sys\_add}} system call implementation, a function that takes two arguments and returns the sum is used. The function checks for two arguments and if not present returns $-1$ as an error code. Corresponding additions of definitions have been done in files - {\ttfamily{user.h, syscall.h, usys.S, syscall.c}}.
+\end{addmargin}
+
+\section*{\underline{Part 3 - {\ttfamily{sys\_ps}} System Call}}
+\begin{addmargin}[0.7in]{0in}
+\begin{lstlisting}[language=C,firstnumber=270,caption={\ttfamily{sys\_ps}} function implementation - {\ttfamily{proc.c}},frame=single,backgroundcolor=\color{cream}]
+// list all processes
+int
+sys_ps(void)
+{
+    struct proc *p;
+    
+    acquire(&ptable.lock);
+
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if(p->pid != 0 && p->state != ZOMBIE){
+            cprintf("pid:%d name:%s\n",p->pid,p->name);
+        }
+    }
+
+    release(&ptable.lock);
+    return 0;
+}
+\end{lstlisting}
+\end{addmargin}
+
+\vspace{5mm}
+\begin{addmargin}[0.1in]{0in}
+    For the {\ttfamily{sys\_ps}} system call implementation, a function that loops over the {\ttfamily{ptable}} has been used. The function locks the {\ttfamily{ptable}} during the loop and prints the pid and name of process with non-zero pid. The zombie processes are ignored in this implementation. Corresponding additions of definitions have been done in files - {\ttfamily{user.h, syscall.h, usys.S, syscall.c}}. Also an {\ttfamily{extern}} definition has been added to {\ttfamily{sysproc.c}}.
+\end{addmargin}
+
+\end{document}
