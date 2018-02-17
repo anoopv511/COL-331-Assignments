@@ -1,5 +1,5 @@
 \documentclass[12pt]{article}
-\usepackage[margin=0.8in,bottom=0.5in,top=0.7in]{geometry}
+\usepackage[margin=0.8in,bottom=0.4in,top=0.5in]{geometry}
 \usepackage{amsmath}
 \usepackage{indentfirst}
 \usepackage{listings}
@@ -36,19 +36,19 @@
 \section*{\underline{Part 1 - System Call Tracing}}
 \subsection*{Printing the Trace}
 \begin{addmargin}[0.7in]{0in}
-\begin{lstlisting}[language=C,firstnumber=231,caption=Modification in ``{\ttfamily{syscall}}" function - {\ttfamily{syscall.c}},frame=single]
+\begin{lstlisting}[language=C,firstnumber=235,caption=Modification in ``{\ttfamily{syscall}}" function - {\ttfamily{syscall.c}},frame=single]
 if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
 \end{lstlisting}
 
 \vspace{-\baselineskip}
-\begin{lstlisting}[language=C,firstnumber=232,frame=single,backgroundcolor=\color{cream}]
-    if(toggle_state == 1){
-        print_syscalls(curproc);
-    }
+\vspace{0.2mm}
+\begin{lstlisting}[language=C,firstnumber=236,frame=single,backgroundcolor=\color{cream}]
+    track_syscalls(curproc);
 \end{lstlisting}
 
 \vspace{-\baselineskip}
-\begin{lstlisting}[language=C,firstnumber=235,frame=single]
+\vspace{0.2mm}
+\begin{lstlisting}[language=C,firstnumber=237,frame=single]
     curproc->tf->eax = syscalls[num]();
 } else {
     cprintf("%d %s: unknown sys call %d\n",
@@ -60,35 +60,40 @@ if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
 
 \vspace{5mm}
 \begin{addmargin}[0.1in]{0in}
-    At line $233$ in Listing 1, the function {\ttfamily{print\_syscalls}} is used to print the syscalls that are issued.
+    At line $236$ in Listing 1, the function {\ttfamily{track\_syscalls}} is used to print the syscalls that are issued only if the {\ttfamily{toggle\_state}} is set to $1$.
 \end{addmargin}
 \vspace{5mm}
 
 \begin{addmargin}[0.7in]{0in}
-\begin{lstlisting}[language=C,firstnumber=139,caption={\ttfamily{print\_syscalls}} function implementation - {\ttfamily{syscall.c}},frame=single,backgroundcolor=\color{cream}]
+\begin{lstlisting}[language=C,firstnumber=139,caption={\ttfamily{track\_syscalls}} function implementation - {\ttfamily{syscall.c}},frame=single,backgroundcolor=\color{cream}]
 int syscall_count[24] = {0};
 \end{lstlisting}
 
 \vspace{-\baselineskip}
+\vspace{0.2mm}
 \begin{lstlisting}[language=C,firstnumber=140,frame=single,backgroundcolor=\color{cream}]
 // Syscall identification
 void
-print_syscalls(struct proc *p)
-{
-    switch(p->tf->eax)
+track_syscalls(struct proc *p)
+{   
+    ++syscall_count[p->tf->eax - 1];
+    if(toggle_state == 1)
     {
-    case 1:
-        cprintf("%s %d\n","sys_fork",++syscall_count[p->tf->eax - 1]);
-        break;
-    case 2:
-        .
-        .
+        switch(p->tf->eax)
+        {
+            case 1:
+                cprintf("%s %d\n","sys_fork",syscall_count[p->tf->eax - 1]);
+                break;
+            case 2:
+                .
+                .
 \end{lstlisting}
 
-\begin{lstlisting}[language=C,firstnumber=218,frame=single,backgroundcolor=\color{cream}]
-    default:
-        cprintf("Unknown syscall\n");
-        break;
+\begin{lstlisting}[language=C,firstnumber=221,frame=single,backgroundcolor=\color{cream}]
+            default:
+                cprintf("Unknown syscall\n");
+                break;
+        }
     }
 }
 \end{lstlisting}
@@ -96,7 +101,7 @@ print_syscalls(struct proc *p)
 
 \vspace{5mm}
 \begin{addmargin}[0.1in]{0in}
-    {\ttfamily{print\_syscalls}} function implementation uses a global array ({\ttfamily{syscall\_count}}) to maintain the count of the syscalls issued. The function uses {\ttfamily{switch-case}} statements to print appropriate syscall count when called.
+    {\ttfamily{track\_syscalls}} function implementation uses a global array ({\ttfamily{syscall\_count}}) to maintain the count of the syscalls issued. The function uses {\ttfamily{switch-case}} statements to print appropriate syscall count when called only if the {\ttfamily{toggle\_state}} is set to $1$.
 \end{addmargin}
 
 \subsection*{Toggling the Printing of Trace}
