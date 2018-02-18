@@ -158,7 +158,7 @@ sys_ps(void)
     acquire(&ptable.lock);
 
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-        if(p->pid != 0 && p->state != ZOMBIE){
+        if(p->pid != 0 && p->state != ZOMBIE && p->state != UNUSED && p->state != EMBRYO){
             cprintf("pid:%d name:%s\n",p->pid,p->name);
         }
     }
@@ -171,7 +171,7 @@ sys_ps(void)
 
 \vspace{5mm}
 \begin{addmargin}[0.1in]{0in}
-    For the {\ttfamily{sys\_ps}} system call implementation, a function that loops over the {\ttfamily{ptable}} has been used. The function locks the {\ttfamily{ptable}} during the loop and prints the pid and name of process with non-zero pid. The zombie processes are ignored in this implementation. Corresponding additions of definitions have been done in files - {\ttfamily{user.h, syscall.h, usys.S, syscall.c}}. Also an {\ttfamily{extern}} definition has been added to {\ttfamily{sysproc.c}}.
+    For the {\ttfamily{sys\_ps}} system call implementation, a function that loops over the {\ttfamily{ptable}} has been used. The function locks the {\ttfamily{ptable}} during the loop and prints the pid and name of process with non-zero pid. The unused, embryo and zombie processes are ignored in this implementation. Corresponding additions of definitions have been done in files - {\ttfamily{user.h, syscall.h, usys.S, syscall.c}}. Also an {\ttfamily{extern}} definition has been added to {\ttfamily{sysproc.c}}.
 \end{addmargin}
 
 \end{document}
