@@ -276,7 +276,7 @@ sys_ps(void)
   acquire(&ptable.lock);
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->pid != 0 && p->state != ZOMBIE){
+    if(p->pid != 0 && p->state != ZOMBIE && p->state != UNUSED && p->state != EMBRYO){
       cprintf("pid:%d name:%s\n",p->pid,p->name);
     }
   }
