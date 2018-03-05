@@ -87,6 +87,7 @@ allocproc(void)
 
 found:
   p->state = EMBRYO;
+  p->priority = 5;
   p->pid = nextpid++;
 
   release(&ptable.lock);
@@ -269,20 +270,52 @@ exit(void)
 
 // list all processes
 int
-sys_ps(void)
+ps(void)
 {
   struct proc *p;
   
   acquire(&ptable.lock);
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->pid != 0 && p->state != ZOMBIE && p->state != UNUSED && p->state != EMBRYO){
-      cprintf("pid:%d name:%s\n",p->pid,p->name);
+    if(p->pid != 0){
+      switch(p->state)
+      {
+        case(RUNNING):
+          cprintf("pid:%d name:%s state:RUNNING priority:%d\n",p->pid,p->name,p->priority);
+          break;
+        case(RUNNABLE):
+          cprintf("pid:%d name:%s state:RUNNABLE priority:%d\n",p->pid,p->name,p->priority);
+          break;
+        case(SLEEPING):
+          cprintf("pid:%d name:%s state:SLEEPING priority:%d\n",p->pid,p->name,p->priority);
+          break;
+        default:
+          break;
+      }
     }
   }
 
   release(&ptable.lock);
   return 0;
+}
+
+// set priority
+int
+setpriority(int pid,int priority)
+{
+  struct proc *p;
+  
+  acquire(&ptable.lock);
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid){
+      p->priority = priority;
+      break;
+    }
+  }
+
+  release(&ptable.lock);
+  return pid;
 }
 
 // Wait for a child process to exit and return its pid.
@@ -340,7 +373,7 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *p;
+  struct proc *p,*q;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -348,11 +381,23 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
+    struct proc *high; 
+
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
+
+      high = p;
+
+      for(q = ptable.proc; q < &ptable.proc[NPROC]; q++){
+        if(q->state != RUNNABLE)
+          continue;
+        if(q->priority > high->priority)
+          high = q;
+      }
+      p = high;
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it

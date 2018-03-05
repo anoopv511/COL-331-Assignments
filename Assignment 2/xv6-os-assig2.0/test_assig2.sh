@@ -46,7 +46,7 @@ set timeout -1
 set testname [lindex $argv 0];
 set testname1 [lindex $argv 1];
 spawn /bin/sh
-expect "$ "
+expect ">> "
 send "make qemu-nox\r"
 sleep 1
 expect "$"
@@ -57,6 +57,6 @@ send "$testname1\r"
 sleep 3
 send "\x01"; send "x"
 expect "QEMU: Terminated\r"
-expect "$ "
+expect ">> "
 send "exit\r"
 expect eof

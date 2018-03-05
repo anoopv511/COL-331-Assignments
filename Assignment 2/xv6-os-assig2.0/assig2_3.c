@@ -4,7 +4,7 @@
 #include "fcntl.h"
 int main(int argc , char *argv[]){
 	long x=0;
-	float z;
+	int z;
 	int pid = fork();
 	if(pid < 0)
 	{
@@ -14,7 +14,7 @@ int main(int argc , char *argv[]){
 	{
 
 		setpriority(getpid(), 18);
-		for(z=0;z<900000;z=z+0.01){
+		for(z=0;z<9000;z=z+1){
 			printf(1, "b\n");
 			x = x + 3.15*z;
 			if(x==0){
@@ -39,7 +39,7 @@ int main(int argc , char *argv[]){
 		else if(pid1 == 0)
 		{
 			setpriority(getpid(), 19);
-			for(z=0;z<900000;z=z+0.01){
+			for(z=0;z<9000;z=z+1){
 				printf(1,"c\n");
 				x = x + 3.15*z;
 				if(x==0){
@@ -49,7 +49,7 @@ int main(int argc , char *argv[]){
 		}
 		else
 		{
-			for(z=0;z<900000;z=z+0.01){
+			for(z=0;z<9000;z=z+1){
 				x = x + 3.15*z;
 				printf(1,"a\n");
 				if(x==0){

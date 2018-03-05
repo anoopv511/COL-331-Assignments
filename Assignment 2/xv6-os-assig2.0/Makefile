@@ -175,9 +175,9 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_user_toggle\
-	_assig1_1\
-	_assig1_3\
-	_assig1_5\
+	_assig2_1\
+	_assig2_2\
+	_assig2_3\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

@@ -91,7 +91,7 @@ sys_uptime(void)
 }
 
 // toggles the system trace (1 - ON | 0 - OFF)
-int toggle_state = 1;
+int toggle_state = 0;
 int
 sys_toggle(void)
 {
@@ -113,5 +113,27 @@ sys_add(void)
   return a + b;
 }
 
+extern int ps(void);
+
 // list all processes
-extern int sys_ps(void);
+int
+sys_ps(void)
+{
+  return ps();
+}
+
+extern int setpriority(int,int);
+
+// set priority
+int
+sys_setpriority(void)
+{
+  int pid;
+  int priority;
+
+  if(argint(0, &pid) < 0)
+    return -1;
+  if(argint(1, &priority) < 0)
+    return -1;
+  return setpriority(pid,priority);
+}
