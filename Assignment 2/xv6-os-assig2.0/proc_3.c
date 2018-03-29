@@ -446,15 +446,15 @@ scheduler(void)
         flag = 1;
       }
 
-      // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      //   if(p->state == RUNNABLE || p->state == RUNNING){
-      //     p->counter++;
-      //     if(p->counter >= 50){
-      //     p->counter = 0;
-      //     p->priority = p->priority == 20 ? 20 : p->priority + 1;
-      //     }
-      //   }
-      // }
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if(p->state == RUNNABLE || p->state == RUNNING){
+          p->counter++;
+          if(p->counter >= 50){
+          p->counter = 0;
+          p->priority = p->priority == 20 ? 20 : p->priority + 1;
+          }
+        }
+      }
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.

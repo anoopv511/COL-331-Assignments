@@ -51,10 +51,10 @@ send "make qemu-nox\r"
 sleep 1
 expect "$"
 send "$testname\r"
-sleep 4
+sleep 2
 expect "$"
 send "$testname1\r"
-sleep 3
+sleep 2
 send "\x01"; send "x"
 expect "QEMU: Terminated\r"
 expect ">> "

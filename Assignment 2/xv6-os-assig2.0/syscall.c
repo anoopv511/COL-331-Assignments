@@ -107,6 +107,7 @@ extern int sys_toggle(void);
 extern int sys_add(void);
 extern int sys_ps(void);
 extern int sys_setpriority(void);
+extern int sys_getpriority(void);
 
 extern int toggle_state;
 
@@ -135,10 +136,11 @@ static int (*syscalls[])(void) = {
 [SYS_toggle]  sys_toggle,
 [SYS_add]     sys_add,
 [SYS_ps]      sys_ps,
-[SYS_setpriority] sys_setpriority
+[SYS_setpriority] sys_setpriority,
+[SYS_getpriority] sys_getpriority
 };
 
-int syscall_count[25] = {0};
+int syscall_count[26] = {0};
 // Syscall identification
 void
 track_syscalls(struct proc *p)
@@ -222,6 +224,9 @@ track_syscalls(struct proc *p)
         break;
       case 25:
         cprintf("%s %d\n","sys_setpriority",syscall_count[p->tf->eax - 1]);
+        break;
+      case 26:
+        cprintf("%s %d\n","sys_getpriority",syscall_count[p->tf->eax - 1]);
         break;
       default:
         cprintf("Unknown syscall\n");
