@@ -1,0 +1,145 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.8in,bottom=0.4in,top=0.5in]{geometry}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{scrextend}
+\usepackage{expl3,xparse}
+
+\definecolor{gray}{rgb}{0.8,0.8,0.8}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{cream}{rgb}{1.0, 0.99, 0.6}
+
+\lstset{language=C,
+    basicstyle=\ttfamily,
+    keywordstyle=\color{blue}\ttfamily,
+    stringstyle=\color{mauve}\ttfamily,
+    commentstyle=\color{green}\ttfamily,
+    morecomment=[l][\color{magenta}]{\#}
+    showstringspaces=false,
+    morekeywords={include, printf},
+    backgroundcolor=\color{white},
+    showstringspaces=false,
+    numbers=left,
+    stepnumber=1,
+    breaklines=true,
+}
+
+\title{\underline{\textbf{Assignment 2 Report}}}
+\author{\textbf{Anoop (2015CS10265)}}
+
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+
+\section*{\underline{Part 1 - Add and print priority of the process}}
+\subsection*{Modify {\ttfamily{sys\_ps}} to print priority}
+\begin{addmargin}[0.3in]{0in}
+    To implement this, process structure has been changed in \textbf{proc.h} file [Line 44]. Default priority has been set to 5 in \textbf{proc.c} file [Line 90]. To print the priority while listing processes, changes are made to \textbf{ps} function in \textbf{proc.c} file.
+\end{addmargin}
+
+\subsection*{Add {\ttfamily{sys\_setpriority}} system call}
+\begin{addmargin}[0.3in]{0in}
+\begin{lstlisting}[language=C,firstnumber=125,caption={\ttfamily{sys\_setpriority}} function implementation - {\ttfamily{sysproc.c}},frame=single,backgroundcolor=\color{cream}]
+extern int setpriority(int,int);
+
+// set priority
+int
+sys_setpriority(void)
+{
+    int pid;
+    int priority;
+
+    if(argint(0, &pid) < 0)
+    return -1;
+    if(argint(1, &priority) < 1 && argint(1, &priority) > 20){
+    cprintf("Error\n");
+    return -1;
+    }
+    return setpriority(pid,priority);
+}
+\end{lstlisting}
+\begin{lstlisting}[language=C,firstnumber=303,caption={\ttfamily{setpriority}} function implementation - {\ttfamily{proc.c}},frame=single,backgroundcolor=\color{cream}]
+// set priority
+int
+setpriority(int pid,int priority)
+{
+  struct proc *p;
+  
+  acquire(&ptable.lock);
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid){
+      p->priority = priority;
+      break;
+    }
+  }
+
+  release(&ptable.lock);
+  return pid;
+}
+\end{lstlisting}
+\end{addmargin}
+
+\vspace{5mm}
+\begin{addmargin}[0.3in]{0in}
+    For the {\ttfamily{sys\_setpriority}} system call implementation, a function takes that takes two arguments - PID and Priority and returns pid if successful or -1 on failure is used. {\ttfamily{ptable}} is locked while setting the priority. It report ``Error" on passing invalid priority (\textgreater{} 1 or \textless{} 20).
+\end{addmargin}
+
+\section*{\underline{Part 2 - Implement Priority Scheduler}}
+\begin{addmargin}[0.3in]{0in}
+To implement Priority based Round Robin, \textbf{scheduler} function has been updated in \textbf{proc.c} file. Lines 415 - 423 find the process with highest priority in the ptable. Lines 435 - 447  ensure the Round Robin fashion running of processes.
+\end{addmargin}
+
+\section*{\underline{Part 3 - Starvation}}
+\subsection*{Add {\ttfamily{sys\_getpriority}} system call}
+\begin{addmargin}[0.3in]{0in}
+\begin{lstlisting}[language=C,firstnumber=143,caption={\ttfamily{sys\_getpriority}} function implementation - {\ttfamily{sysproc.c}},frame=single,backgroundcolor=\color{cream}]
+extern int getpriority(int);
+
+// get priority
+int
+sys_getpriority(void)
+{
+    int pid;
+
+    if(argint(0, &pid) < 0)
+        return -1;
+    return getpriority(pid);
+}
+\end{lstlisting}
+\begin{lstlisting}[language=C,firstnumber=322,caption={\ttfamily{getpriority}} function implementation - {\ttfamily{proc.c}},frame=single,backgroundcolor=\color{cream}]
+// get priority
+int
+getpriority(int pid)
+{
+    struct proc *p;
+    int priority = -1;
+    
+    acquire(&ptable.lock);
+
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if(p->pid == pid){
+            priority = p->priority;
+            break;
+        }
+    }
+    release(&ptable.lock);
+    if(priority == -1)
+        cprintf("PID not found");
+    return priority;
+}
+\end{lstlisting}
+\end{addmargin}
+
+\vspace{5mm}
+\begin{addmargin}[0.3in]{0in}
+For the {\ttfamily{sys\_getpriority}} system call implementation, a function takes that takes two arguments - PID and returns priority if successful or -1 on failure is used. {\ttfamily{ptable}} is locked while setting the priority. It report ``PID not found" on passing PID which does not exist.
+\end{addmargin}
+\subsection*{Handle starvation}
+\begin{addmargin}[0.3in]{0in}
+To handle starvation a counter is implemented which counts the number of context switches. It adds 1 to priority after counter reaches 50 and resets counter to 0. This has been implemented in \textbf{scheduler} function in \textbf{proc\_3.c} file [Line 449 - 460].
+\end{addmargin}
+
+\end{document}
