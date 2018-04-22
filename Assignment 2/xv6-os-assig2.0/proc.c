@@ -420,6 +420,14 @@ scheduler(void)
         if(q->priority > high->priority)
           high = q;
       }
+      if(flag){
+      	for(q = ptable.proc; q < p; q++){
+      		if(q->state != RUNNABLE)
+	          continue;
+	        if(q->priority > high->priority)
+	          high = q;
+      	}
+      }
       p = high;
 
       // Switch to chosen process.  It is the process's job
@@ -446,12 +454,12 @@ scheduler(void)
         flag = 1;
       }
 
-      // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      //   if(p->state == RUNNABLE || p->state == RUNNING){
-      //     p->counter++;
-      //     if(p->counter >= 50){
-      //     p->counter = 0;
-      //     p->priority = p->priority == 20 ? 20 : p->priority + 1;
+      // for(p1 = ptable.proc; p1 < &ptable.proc[NPROC]; p1++){
+      //   if(p1->state == RUNNABLE || p1->state == RUNNING){
+      //     p1->counter++;
+      //     if(p1->counter >= 50){
+      //     p1->counter = 0;
+      //     p1->priority = p1->priority == 20 ? 20 : p1->priority + 1;
       //     }
       //   }
       // }
