@@ -2,7 +2,7 @@
 #include "user.h"
 #include "uthread.c"
 
-static void 
+void 
 mythread(void)
 {
   int i;
@@ -20,6 +20,7 @@ mythread(void)
 int
 main(void)
 {
+  thread_init();
   thread_create("T0", mythread);
   thread_create("T1", mythread);
   thread_schedule();
