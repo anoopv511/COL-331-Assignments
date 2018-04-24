@@ -12,7 +12,7 @@ void
 thread_init(void)
 {
   current_thread = &all_thread[0];
-  current_thread->state = RUNNABLE;
+  current_thread->state = RUNNING;
 }
 
 static void 
@@ -30,7 +30,7 @@ thread_schedule(void)
   }
 
   for(t1 = all_thread; t1 < all_thread + MAX_THREAD; t1++){
-    if(t1->state == RUNNABLE){
+    if(t1->state == RUNNABLE || t1->state == WAITING){
       flag = 0;
       break;
     }
@@ -87,4 +87,69 @@ thread_yield(void)
 {
   current_thread->state = RUNNABLE;
   thread_schedule();
+}
+
+void 
+print_states(void)
+{
+  thread* t;
+  for (t = all_thread; t < all_thread + MAX_THREAD; t++) {
+    printf(1,"%s - %d\n",t->name,t->state);
+  }
+}
+
+void 
+initlock(struct lock *lk)
+{
+  lk->locked = 0;
+  lk->counter = 0;
+}
+
+int 
+test_and_set(lock *lk)
+{
+	int rv = lk->locked;
+  lk->locked = 1;
+  return rv;
+}
+
+void 
+lock_busy_wait_acquire(lock *lk)
+{
+	if(test_and_set(lk) == 1){
+		thread_yield();
+    lock_busy_wait_acquire(lk);
+	}
+  else{
+		lk->locked = 1;
+	}
+}
+
+void 
+lock_busy_wait_release(lock *lk){
+	lk->locked = 0;
+}
+
+void 
+lock_acquire(lock *lk){
+	if(test_and_set(lk) == 1){
+		current_thread->state = WAITING;
+		lk->waitarr[lk->counter] = current_thread;
+		lk->counter += 1;
+		thread_schedule();
+    lock_acquire(lk);
+	}else{
+		lk->locked = 1;
+	}
+}
+
+void 
+lock_wait_release(lock *lk){
+	lk->locked = 0;
+	int i;
+	for(i=0;i<lk->counter;i++){
+		(lk->waitarr[i])->state = RUNNABLE;
+		lk->waitarr[i] = 0;
+	}
+  lk->counter = 0;
 }
