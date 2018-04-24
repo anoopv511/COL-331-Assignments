@@ -157,6 +157,10 @@ _assig3_1: assig3_1.o uthread_switch.o
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _assig3_1 assig3_1.o uthread_switch.o $(ULIB)
 	$(OBJDUMP) -S _assig3_1 > assig3_1.asm
 
+_assig3_2: assig3_2.o uthread_switch.o
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _assig3_2 assig3_2.o uthread_switch.o $(ULIB)
+	$(OBJDUMP) -S _assig3_2 > assig3_2.asm
+
 mkfs: mkfs.c fs.h
 	gcc -Werror -Wall -o mkfs mkfs.c
 
@@ -184,6 +188,7 @@ UPROGS=\
 	_zombie\
 	_uthread\
 	_assig3_1\
+	_assig3_2\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
