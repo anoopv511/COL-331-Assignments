@@ -161,6 +161,22 @@ _assig3_2: assig3_2.o uthread_switch.o
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _assig3_2 assig3_2.o uthread_switch.o $(ULIB)
 	$(OBJDUMP) -S _assig3_2 > assig3_2.asm
 
+_assig3_3: assig3_3.o uthread_switch.o
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _assig3_3 assig3_3.o uthread_switch.o $(ULIB)
+	$(OBJDUMP) -S _assig3_3 > assig3_3.asm
+
+_assig3_4: assig3_4.o uthread_switch.o
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _assig3_4 assig3_4.o uthread_switch.o $(ULIB)
+	$(OBJDUMP) -S _assig3_4 > assig3_4.asm
+
+_assig3_5: assig3_5.o uthread_switch.o
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _assig3_5 assig3_5.o uthread_switch.o $(ULIB)
+	$(OBJDUMP) -S _assig3_5 > assig3_5.asm
+
+_assig3_6: assig3_6.o uthread_switch.o
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _assig3_6 assig3_6.o uthread_switch.o $(ULIB)
+	$(OBJDUMP) -S _assig3_6 > assig3_6.asm
+
 mkfs: mkfs.c fs.h
 	gcc -Werror -Wall -o mkfs mkfs.c
 
@@ -189,6 +205,10 @@ UPROGS=\
 	_uthread\
 	_assig3_1\
 	_assig3_2\
+	_assig3_3\
+	_assig3_4\
+	_assig3_5\
+	_assig3_6\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
