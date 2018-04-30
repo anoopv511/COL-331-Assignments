@@ -9,15 +9,19 @@
 
 // Thread Structure 
 typedef struct thread {
-  int  sp;                      // curent stack pointer
-  char stack[STACK_SIZE];       // the thread's stack
-  int  state;                   // running, runnable, waiting
-  char* name;                   // name of thread
+  int   sp;                      // curent stack pointer
+  char  stack[STACK_SIZE];       // the thread's stack
+  int   state;                   // running, runnable, waiting
+  char* name;                    // name of thread
+  int   priority;                // thread priority
+  int   counter;                 // age counter
 } thread;
 
 // Lock Structure
 typedef struct lock {
-  int locked;        // Lock status
+  int locked;                     // Lock status
+  thread* holder;                 // Lock holder
   thread *waitarr[MAX_THREAD];    // Threads waiting on lock
-  int counter;       // Number of waiting threads
+  int counter;                    // Number of waiting threads
+  int holder_priority;            // Lock holder priority
 } lock;
